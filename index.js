@@ -112,8 +112,8 @@ const lolcatjs = require('lolcatjs');
 const rateLimit = new Map();
 
 // Konfigurasi
-const ownerNumber = '62xxxxxxx@s.whatsapp.net';
-const pairingID = '62xxxxxxx'
+const ownerNumber = '6283841951316@s.whatsapp.net';
+const pairingID = '6283841951316'
 const usePairingCode = true
 let isPublic = true;
 
@@ -521,7 +521,7 @@ const startSock = async () => {
         const command = body.slice(1).trim().split(' ')[0];
         const args = body.slice(1).trim().split(' ').slice(1);
         const text = q = args.join(" ");
-        
+
         if (rateLimit.has(sender)) {
             const lastCommandTime = rateLimit.get(sender);
             if (Date.now() - lastCommandTime < 5000) {
@@ -591,27 +591,6 @@ const startSock = async () => {
             }, {
                 quoted: quoted
             })
-        }
-        if (m.message) {            
-        console.log(chalk.cyan(`────────────『 ${chalk.redBright('ᴵᴺᶠᴼ ᴹᴱˢˢᴬᴳᴱ')} 』────────────`));
-        console.log(`   ${chalk.cyan('» Message Type')}: ${m.mtype}`);
-        console.log(`   ${chalk.cyan('» Sent Time')}: ${time2}`);
-        console.log(`   ${chalk.cyan('» Sender Name')}: ${pushname || 'N/A'}`);
-        console.log(`   ${chalk.cyan('» Chat ID')}: ${m.chat.split('@')[0]}`);
-        console.log(`   ${chalk.cyan('» Chat Name')}: ${budy || 'N/A'}`);
-        console.log(`   ${chalk.cyan('» Author By')}: TanakaSensei`);
-        console.log(chalk.cyan('───────────────────────────────────⳹\n'));
-    }
-        // Fungsi lain wak
-        async function pepe(media) {
-            const jimpfrop = await Jimp.read(media);
-            const minpp = jimpfrop.getWidth();
-            const maxpp = jimpfrop.getHeight();
-            const cropped = jimpfrop.crop(0, 0, minpp, maxpp);
-            return {
-                img: await cropped.scaleToFit(500, 500).getBufferAsync(Jimp.MIME_JPEG),
-                preview: await cropped.normalize().getBufferAsync(Jimp.MIME_JPEG),
-            };
         }
         try {
             switch (command) {
@@ -740,6 +719,39 @@ const startSock = async () => {
                     }
                     break
                     // System Information
+                case 'dor':
+                    if (!m.isGroup) return m.reply('Perintah hanya tersedia dalam Group.');
+                    if (!isAdmin && !isOwner) return m.reply('Only for Admins');
+
+                    let blockwww = m.mentionedJid[0] ?
+                        m.mentionedJid[0] :
+                        m.quoted ?
+                        m.quoted.sender :
+                        text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
+
+                    try {
+                        await sock.groupParticipantsUpdate(m.chat, [blockwww], 'remove');
+                        m.reply('*`Success`* Kick Member ✅');
+                    } catch (err) {
+                        m.reply(json(err));
+                    }
+
+                    break;
+                case 'tag':
+                    if (!isOwner) return m.reply('??');
+                    let mem = m.isGroup ? await groupMetadata.participants.map(a => a.id) : "";
+
+                    sock.sendMessage(m.chat, {
+                        text: `@${m.chat} ${text}`,
+                        contextInfo: {
+                            mentionedJid: mem,
+                            groupMentions: [{
+                                groupSubject: `everyone`,
+                                groupJid: m.chat,
+                            }, ],
+                        },
+                    });
+                    break;
                 case 'system':
                     if (isOwner) {
                         const systemInfo = getSystemInfo();
@@ -754,12 +766,31 @@ const startSock = async () => {
                     break;
 
                 case 'menu':
-                    const menu = `📞 *Contact Information*
+                    const menu = `_LIST CMD :_
 
-👨‍💻 *Info Developer*
-➤ *Developer:* TanakaDomp
-➤ *GitHub:* https://github.com/TanakaDomp
-➤ *Email:* tanakadomp@gmail.com`;
+ ›› *self*
+> Mode self: Bot hanya dapat digunakan oleh pemiliknya.
+
+ ›› *public*
+> Mode public: Bot dapat digunakan oleh semua orang.
+
+ ›› *dor*
+> Perintah dor: Mengeluarkan member yang bermasalah.
+
+ ›› *dl*
+> Perintah dl: Mengunduh media dari tautan yang diberikan.
+
+ ›› *music*
+> Perintah music: Memutar atau mencari musik.
+
+ ›› *sc*
+> Perintah sc: Mencari informasi melalui perintah khusus.
+
+ ›› *delhome*
+> Perintah delhome: Menghapus data di direktori home.
+
+ ›› *tag*
+> Perintah tag: Menandai semua anggota dalam grup.`;
                     sendFotoUrl(from, "https://files.catbox.moe/7k1gx9.jpg", menu, m)
                     break;
             }
